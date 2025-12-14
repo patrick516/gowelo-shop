@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= subject %></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .welcome-text {
+            font-size: 18px;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .info-box {
+            background-color: #f9f9f9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .steps {
+            margin: 30px 0;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .step-number {
+            background-color: #4caf50;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .step-content h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .step-content p {
+            margin: 0;
+            color: #666;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .contact-info p {
+            margin: 5px 0;
+        }
+        .highlight {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffb300;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><%= appName %></h1>
+            <p>Malawi's Premier Agro-Dealer Marketplace</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-text">
+                Welcome to <%= appName %>, <%= businessName %>!
+            </div>
+            
+            <p>Dear <%= contactPerson %>,</p>
+            
+            <p>Congratulations on joining Malawi's fastest growing agro-dealer marketplace! 
+            We're excited to help you connect with farmers across the country and grow your business.</p>
+            
+            <div class="info-box">
+                <h3>Your Account Details:</h3>
+                <p><strong>Business Name:</strong> <%= businessName %></p>
+                <p><strong>Trial Period:</strong> <%= trialDays %> days (ends <%= trialEndDate %>)</p>
+                <p><strong>Dashboard Access:</strong> <a href="<%= dashboardUrl %>"><%= dashboardUrl %></a></p>
+            </div>
+            
+            <div class="highlight">
+                <strong>🚀 Quick Start Guide:</strong> Follow these steps to get started selling on <%= appName %>
+            </div>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Complete Your Profile</h4>
+                        <p>Add business details, logo, and contact information to build trust with farmers.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Add Your Products</h4>
+                        <p>List seeds, fertilizers, tools, and other agro-inputs with clear descriptions and prices.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Set Up Delivery</h4>
+                        <p>Configure delivery options and prices for different regions in Malawi.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Start Receiving Orders</h4>
+                        <p>Farmers will discover your products and place orders through our platform.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="<%= dashboardUrl %>" class="cta-button">
+                    Go to Your Dashboard
+                </a>
+            </div>
+            
+            <p>During your trial period, you can:</p>
+            <ul>
+                <li>List up to 10 products</li>
+                <li>Receive unlimited orders</li>
+                <li>Access basic analytics</li>
+                <li>Use our mobile money payment system</li>
+            </ul>
+            
+            <p>Need help getting started? Our support team is here for you!</p>
+        </div>
+        
+        <div class="footer">
+            <p>© <%= currentYear %> <%= appName %>. Empowering Malawi's Agricultural Sector.</p>
+            
+            <div class="contact-info">
+                <p><strong>Need Help?</strong></p>
+                <p>Email: <a href="mailto:<%= supportEmail %>"><%= supportEmail %></a></p>
+                <p>Phone: <%= supportPhone %></p>
+                <p>Hours: Mon-Fri 8:00 AM - 5:00 PM (CAT)</p>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                This email was sent to you as a registered agro-dealer on <%= appName %>.
+                If you believe you received this email in error, please contact us immediately.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

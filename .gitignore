@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Prisma
+.env
+.env.*
+prisma/dev.db
+prisma/migrations/**/migration.sql
+
+# Build outputs
+dist/
+build/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
