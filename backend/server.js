@@ -6,8 +6,24 @@ require("dotenv").config();
 
 const app = express();
 
+// ✅ CORS configuration
+const allowedOrigins = ["https://gowelo-shop.vercel.app"]; // frontend URL
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true, // allow cookies, authorization headers
+  }),
+);
+
 // Middlewares
-app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
