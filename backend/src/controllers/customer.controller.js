@@ -183,7 +183,7 @@ exports.getCustomerHistory = async (req, res) => {
 
     // Convert customerId string to ObjectId
     const transactions = await DebtTransaction.find({
-      customerId: mongoose.Types.ObjectId(customerId),
+      customerId: new mongoose.Types.ObjectId(customerId),
     }).sort({ createdAt: -1 });
 
     // Map product names

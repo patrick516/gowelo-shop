@@ -105,7 +105,7 @@ const DashboardPage: React.FC = () => {
       setStockPie(pieData);
 
       // 4️⃣ Products sold bar chart
-      const productsRes = await api.get("/dashboard/products"); // new backend endpoint
+      const productsRes = await api.get("/dashboard/products");
       const bars = Array.isArray(productsRes.data)
         ? productsRes.data.map((p: any) => ({
             name: p.name,
@@ -179,6 +179,7 @@ const DashboardPage: React.FC = () => {
                 cy="50%"
                 outerRadius={100}
                 label={({ name, value }) => `${name}: ${value} units`}
+                stroke="none"
               >
                 {stockPie.map((_, index) => (
                   <Cell
@@ -187,7 +188,7 @@ const DashboardPage: React.FC = () => {
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => `${value} units`} />
+              <Tooltip formatter={(value) => `${value ?? 0} units`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -206,17 +207,28 @@ const DashboardPage: React.FC = () => {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip
-                formatter={(value: number) => `MK ${value.toLocaleString()}`}
+                formatter={(value) => `MK ${(value ?? 0).toLocaleString()}`}
               />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="sales"
                 stroke="#4ade80"
+                strokeWidth={2}
                 activeDot={{ r: 8 }}
               />
-              <Line type="monotone" dataKey="revenue" stroke="#60a5fa" />
-              <Line type="monotone" dataKey="profit" stroke="#facc15" />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#60a5fa"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="profit"
+                stroke="#facc15"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -234,11 +246,11 @@ const DashboardPage: React.FC = () => {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip
-                formatter={(value: number) => `MK ${value.toLocaleString()}`}
+                formatter={(value) => `MK ${(value ?? 0).toLocaleString()}`}
               />
               <Legend />
-              <Bar dataKey="revenue" fill="#60a5fa" />
-              <Bar dataKey="profit" fill="#facc15" />
+              <Bar dataKey="revenue" fill="#60a5fa" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="profit" fill="#facc15" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -256,11 +268,22 @@ const DashboardPage: React.FC = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip
-                formatter={(value: number, name: string) => `${value} units`}
+                formatter={(value) => `${value ?? 0} units`}
+                cursor={false}
               />
               <Legend />
-              <Bar dataKey="totalQty" fill="#e5e7eb" name="Total Qty" />
-              <Bar dataKey="soldQty" fill="#4ade80" name="Sold Qty" />
+              <Bar
+                dataKey="totalQty"
+                fill="#e5e7eb"
+                name="Total Qty"
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar
+                dataKey="soldQty"
+                fill="#4ade80"
+                name="Sold Qty"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         )}

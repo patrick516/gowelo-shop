@@ -9,9 +9,12 @@ interface Product {
   sellingPrice: number;
 }
 
-interface BorrowRecord {
-  productName: string;
-  quantity: number;
+interface Transaction {
+  _id: string;
+  type: "BORROW" | "PAYMENT";
+  productName?: string;
+  quantity?: number;
+  amount: number;
   date: string;
 }
 
@@ -22,12 +25,8 @@ interface Debtor {
 }
 
 interface DebtorDetails {
-  customer?: {
-    _id: string;
-    name: string;
-    balance: number;
-  };
-  borrowHistory?: BorrowRecord[];
+  customer: Debtor;
+  transactions: Transaction[];
 }
 
 const DebtorsPage: React.FC = () => {
@@ -35,20 +34,17 @@ const DebtorsPage: React.FC = () => {
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // New credit sale
   const [customerName, setCustomerName] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [amountPaid, setAmountPaid] = useState(0);
 
-  // Per-debtor actions
   const [payments, setPayments] = useState<Record<string, number>>({});
   const [borrowQty, setBorrowQty] = useState<Record<string, number>>({});
   const [borrowProduct, setBorrowProduct] = useState<Record<string, string>>(
     {},
   );
 
-  // Modal state
   const [selectedDebtor, setSelectedDebtor] = useState<DebtorDetails | null>(
     null,
   );
@@ -60,7 +56,7 @@ const DebtorsPage: React.FC = () => {
     : 0;
   const remainingDebt = Math.max(totalAmount - amountPaid, 0);
 
-  // Fetch all products & debtors
+  // Fetch products & debtors
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -115,10 +111,7 @@ const DebtorsPage: React.FC = () => {
       return toast.error("Cannot pay more than balance");
 
     try {
-      await api.post("/customers/pay-debt", {
-        customerId: debtor._id,
-        amount,
-      });
+      await api.post("/customers/pay-debt", { customerId: debtor._id, amount });
       toast.success("Payment recorded");
       setPayments({ ...payments, [debtor._id]: 0 });
       fetchAll();
@@ -149,14 +142,16 @@ const DebtorsPage: React.FC = () => {
     }
   };
 
-  // View debtor details
+  // Fetch debtor history
   const fetchDebtorDetails = async (debtorId: string) => {
     try {
       const res = await api.get(`/customers/${debtorId}/history`);
       setSelectedDebtor(res.data);
       setShowModal(true);
-    } catch {
-      toast.error("Failed to fetch debtor details");
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.message || "Failed to fetch debtor details",
+      );
     }
   };
 
@@ -165,7 +160,7 @@ const DebtorsPage: React.FC = () => {
       <ToastContainer />
       <h1 className="text-xl font-bold text-center">Debtors Management</h1>
 
-      {/* ADD DEBTOR */}
+      {/* Add Debtor */}
       <div className="bg-white p-4 rounded shadow space-y-3">
         <h2 className="font-semibold">Add Debtor (Credit Sale)</h2>
 
@@ -199,7 +194,7 @@ const DebtorsPage: React.FC = () => {
         />
 
         <p>
-          Total: <strong>MK {totalAmount?.toLocaleString() ?? 0}</strong>
+          Total: <strong>MK {totalAmount.toLocaleString()}</strong>
         </p>
 
         <input
@@ -215,7 +210,7 @@ const DebtorsPage: React.FC = () => {
         <p>
           Remaining debt:{" "}
           <strong className="text-red-600">
-            MK {remainingDebt?.toLocaleString() ?? 0}
+            MK {remainingDebt.toLocaleString()}
           </strong>
         </p>
 
@@ -227,7 +222,7 @@ const DebtorsPage: React.FC = () => {
         </button>
       </div>
 
-      {/* DEBTORS TABLE */}
+      {/* Debtors Table */}
       {loading ? (
         <p className="text-center">Loading...</p>
       ) : debtors.length === 0 ? (
@@ -247,9 +242,7 @@ const DebtorsPage: React.FC = () => {
             {debtors.map((d) => (
               <tr key={d._id} className="text-center">
                 <td className="border p-2">{d.name}</td>
-                <td className="border p-2">
-                  MK {d.balance?.toLocaleString() ?? 0}
-                </td>
+                <td className="border p-2">MK {d.balance.toLocaleString()}</td>
                 <td className="border p-2">
                   <input
                     type="number"
@@ -318,45 +311,51 @@ const DebtorsPage: React.FC = () => {
         </table>
       )}
 
-      {/* DEBTOR DETAILS MODAL */}
-      {showModal && (
+      {/* Debtor Details Modal */}
+      {showModal && selectedDebtor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">
-              {selectedDebtor?.customer?.name ?? "Customer"} - Debt Details
+              {selectedDebtor.customer.name} - Debt Details
             </h2>
 
             <p>
               Current Balance:{" "}
               <strong>
-                MK {selectedDebtor?.customer?.balance?.toLocaleString() ?? 0}
+                MK {selectedDebtor.customer.balance.toLocaleString()}
               </strong>
             </p>
 
-            <h3 className="mt-4 font-semibold">Borrow History</h3>
-            {selectedDebtor?.borrowHistory?.length ? (
+            <h3 className="mt-4 font-semibold">Transaction History</h3>
+            {selectedDebtor.transactions.length === 0 ? (
+              <p className="text-gray-500 mt-2">No transactions found.</p>
+            ) : (
               <table className="w-full border mt-2">
                 <thead className="bg-gray-100">
                   <tr>
+                    <th className="border p-2">Date</th>
+                    <th className="border p-2">Type</th>
                     <th className="border p-2">Product</th>
                     <th className="border p-2">Quantity</th>
-                    <th className="border p-2">Date</th>
+                    <th className="border p-2">Amount (MK)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedDebtor.borrowHistory.map((b, idx) => (
-                    <tr key={idx} className="text-center">
-                      <td className="border p-2">{b.productName}</td>
-                      <td className="border p-2">{b.quantity}</td>
+                  {selectedDebtor.transactions.map((tx) => (
+                    <tr key={tx._id} className="text-center">
                       <td className="border p-2">
-                        {new Date(b.date).toLocaleString()}
+                        {new Date(tx.date).toLocaleString()}
+                      </td>
+                      <td className="border p-2">{tx.type}</td>
+                      <td className="border p-2">{tx.productName || "-"}</td>
+                      <td className="border p-2">{tx.quantity || "-"}</td>
+                      <td className="border p-2">
+                        {tx.amount.toLocaleString()}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            ) : (
-              <p className="mt-2 text-gray-500">No borrow history found.</p>
             )}
 
             <button

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import api from "../../services/api";
 
 interface Product {
@@ -78,6 +80,16 @@ const ProductsPage: React.FC<{ onUpdate?: () => void }> = ({ onUpdate }) => {
         sellingPrice: Number(sellingPrice),
       });
 
+      // Show success toast
+      toast.success("Product added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
       // Reset form
       setName("");
       setQuantity("");
@@ -111,6 +123,7 @@ const ProductsPage: React.FC<{ onUpdate?: () => void }> = ({ onUpdate }) => {
 
   return (
     <div className="p-4 space-y-6">
+      <ToastContainer />
       <h1 className="text-2xl font-bold text-center">Chicken Parts Name</h1>
 
       {/* Add Product Button */}
