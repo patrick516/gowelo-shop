@@ -7,7 +7,10 @@ require("dotenv").config();
 const app = express();
 
 // ✅ CORS configuration
-const allowedOrigins = ["https://gowelo-shop.vercel.app"]; // frontend URL
+const allowedOrigins = [
+  "https://gowelo-shop.vercel.app",
+  "http://localhost:5173",
+]; // frontend URL
 app.use(
   cors({
     origin: function (origin, callback) {

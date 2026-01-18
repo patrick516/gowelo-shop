@@ -1,6 +1,8 @@
+// src/controllers/dashboard.controller.js
 const Product = require("../models/Product");
 const StockBatch = require("../models/StockBatch");
 const Sale = require("../models/Sale");
+const Customer = require("../models/Customer"); // ✅ NEW for debtors
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -43,15 +45,13 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.pieChart = async (req, res) => {
   try {
-    // Fetch all products with their quantities
     const products = await Product.find({}, { name: 1, quantity: 1 }).sort({
       name: 1,
     });
 
-    // Map into Recharts-friendly format
     const data = products.map((p) => ({
       name: p.name,
-      value: p.quantity, // actual quantity
+      value: p.quantity,
       status:
         p.quantity === 0
           ? "OUT_OF_STOCK"
@@ -66,11 +66,6 @@ exports.pieChart = async (req, res) => {
   }
 };
 
-/**
- * 📊 BAR CHART
- * - Shows quantity sold per product
- * - Filter: today | yesterday | week | month
- */
 exports.barChart = async (req, res) => {
   try {
     const { range = "today" } = req.query;
@@ -119,18 +114,11 @@ exports.barChart = async (req, res) => {
   }
 };
 
-/**
- * 📈 LINE CHART
- * - Sales trends
- * - period: daily | weekly | monthly
- */
-// dashboard.controller.js
-
 exports.lineChart = async (req, res) => {
   try {
     const { period = "daily" } = req.query;
 
-    let dateFormat = "%Y-%m-%d"; // daily
+    let dateFormat = "%Y-%m-%d";
     if (period === "weekly") dateFormat = "%Y-%U";
     if (period === "monthly") dateFormat = "%Y-%m";
 
@@ -195,26 +183,28 @@ exports.summary = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$quantityAdded" } } },
     ]);
 
+    // ✅ Total debtors
+    const totalDebtors = await Customer.countDocuments({ balance: { $gt: 0 } });
+
     res.json({
       totalProducts,
       totalSales,
       totalRevenue,
       totalProfit,
       totalReplenishment: totalReplenishment[0]?.total || 0,
+      totalDebtors, // ✅ added to summary
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.getProductsSold = async (req, res) => {
   try {
-    // Get all products
     const products = await Product.find();
 
-    // Prepare response array
     const result = await Promise.all(
       products.map(async (product) => {
-        // Sum of sold quantities for this product
         const soldAgg = await Sale.aggregate([
           { $match: { productId: product._id } },
           { $group: { _id: null, totalSold: { $sum: "$quantitySold" } } },

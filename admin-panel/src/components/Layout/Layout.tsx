@@ -14,8 +14,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar for large screens */}
       <div
-        className={`fixed inset-y-0 left-0 z-20 w-64 bg-white border-r shadow-md transform transition-transform duration-300
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:inset-auto`}
+        className={`fixed inset-y-0 left-0 z-20 w-64 transform transition-transform duration-300
+  ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+  lg:static lg:translate-x-0`}
       >
         <Sidebar />
       </div>

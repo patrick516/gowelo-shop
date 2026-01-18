@@ -24,6 +24,7 @@ interface DashboardStats {
   totalRevenue: number;
   totalProfit: number;
   totalReplenishment: number;
+  totalDebtors: number;
 }
 
 // Chart data interfaces
@@ -48,6 +49,18 @@ interface ProductBar {
   soldQty: number;
 }
 
+interface StatCardProps {
+  label: string;
+  value: string | number;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ label, value }) => (
+  <div className="bg-white shadow rounded p-4 flex justify-between items-center">
+    <span className="font-medium">{label}</span>
+    <span className="text-xl font-bold">{value}</span>
+  </div>
+);
+
 // Pie chart colors
 const PIE_COLORS = ["#60a5fa", "#facc15", "#4ade80", "#f87171", "#a78bfa"];
 
@@ -58,6 +71,7 @@ const DashboardPage: React.FC = () => {
     totalRevenue: 0,
     totalProfit: 0,
     totalReplenishment: 0,
+    totalDebtors: 0,
   });
 
   const [salesTrend, setSalesTrend] = useState<SalesTrend[]>([]);
@@ -80,6 +94,7 @@ const DashboardPage: React.FC = () => {
         totalRevenue: data.totalRevenue ?? 0,
         totalProfit: data.totalProfit ?? 0,
         totalReplenishment: data.totalReplenishment ?? 0,
+        totalDebtors: data.totalDebtors ?? 0,
       });
 
       // 2️⃣ Sales trends
@@ -95,11 +110,12 @@ const DashboardPage: React.FC = () => {
       setSalesTrend(trends);
 
       // 3️⃣ Stock pie chart
+
       const stockRes = await api.get("/dashboard/pie");
       const pieData = Array.isArray(stockRes.data)
         ? stockRes.data.map((item: any) => ({
             name: item.name || "Unknown",
-            value: Math.max(Number(item.quantity) || 0, 1),
+            value: Number(item.value) ?? 0, // use correct field
           }))
         : [];
       setStockPie(pieData);
@@ -139,28 +155,25 @@ const DashboardPage: React.FC = () => {
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(stats).map(([key, value]) => (
-          <div
-            key={key}
-            className="bg-white shadow rounded p-4 flex justify-between items-center"
-          >
-            <span className="font-medium">
-              {key
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-            </span>
-            <span className="text-xl font-bold">
-              {typeof value === "number" &&
-              (key.toLowerCase().includes("revenue") ||
-                key.toLowerCase().includes("profit"))
-                ? `MK ${value.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`
-                : value}
-            </span>
-          </div>
-        ))}
+        <StatCard label="Total Products" value={stats.totalProducts} />
+        <StatCard label="Total Sales" value={stats.totalSales} />
+        <StatCard
+          label="Total Revenue"
+          value={`MK ${stats.totalRevenue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          })}`}
+        />
+        <StatCard
+          label="Total Profit"
+          value={`MK ${stats.totalProfit.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          })}`}
+        />
+        <StatCard
+          label="Total Replenishment"
+          value={stats.totalReplenishment}
+        />
+        <StatCard label="Total Debtors" value={stats.totalDebtors} />{" "}
       </div>
 
       {/* Stock Pie Chart */}
@@ -178,7 +191,7 @@ const DashboardPage: React.FC = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label={({ name, value }) => `${name}: ${value} units`}
+                label={false}
                 stroke="none"
               >
                 {stockPie.map((_, index) => (
@@ -188,7 +201,7 @@ const DashboardPage: React.FC = () => {
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => `${value ?? 0} units`} />
+              <Tooltip formatter={(value) => [`${value ?? 0} units`]} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -247,6 +260,7 @@ const DashboardPage: React.FC = () => {
               <YAxis />
               <Tooltip
                 formatter={(value) => `MK ${(value ?? 0).toLocaleString()}`}
+                cursor={false}
               />
               <Legend />
               <Bar dataKey="revenue" fill="#60a5fa" radius={[8, 8, 0, 0]} />
