@@ -65,13 +65,28 @@ const ReportsPage: React.FC = () => {
   const downloadFile = async (endpoint: string, filename: string) => {
     try {
       const res = await api.get(endpoint, { responseType: "blob" });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
+
+      // Create a blob URL
+      const blob = new Blob([res.data], { type: res.data.type });
+      const url = window.URL.createObjectURL(blob);
+
+      // Mobile-safe: open in new tab if download fails
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+
+      // Append to DOM and trigger click
+      document.body.appendChild(a);
+      a.click(); // no need to store result
+      a.remove();
+
+      // iOS Safari fallback
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.open(url, "_blank");
+      }
+
+      // Free memory
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error(`Download error (${filename}):`, err);
       alert(err.response?.data?.message || `Failed to download ${filename}`);

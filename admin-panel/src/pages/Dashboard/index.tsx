@@ -64,6 +64,26 @@ const StatCard: React.FC<StatCardProps> = ({ label, value }) => (
 // Pie chart colors
 const PIE_COLORS = ["#60a5fa", "#facc15", "#4ade80", "#f87171", "#a78bfa"];
 
+// Format date for trend charts (e.g. Jan 21)
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+// Generate an array of last 7 days in YYYY-MM-DD format
+const getLast7Days = (): string[] => {
+  const result: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    result.push(d.toISOString().split("T")[0]); // "YYYY-MM-DD"
+  }
+  return result;
+};
+
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
@@ -97,16 +117,28 @@ const DashboardPage: React.FC = () => {
         totalDebtors: data.totalDebtors ?? 0,
       });
 
-      // 2️⃣ Sales trends
+      // 2️⃣ Sales trends - Last 7 days with missing days filled
       const trendsRes = await api.get("/dashboard/line");
-      const trends = Array.isArray(trendsRes.data)
+      const rawData = Array.isArray(trendsRes.data)
         ? trendsRes.data.map((item: any) => ({
-            date: item._id,
-            sales: item.sold ?? 0,
+            date: item.date || item._id, // date from backend
+            sales: item.sales ?? 0,
             revenue: item.revenue ?? 0,
             profit: item.profit ?? 0,
           }))
         : [];
+
+      // Generate last 7 days
+      const last7Days = getLast7Days();
+
+      // Map backend data to last 7 days
+      const trends = last7Days.map((date) => {
+        const found = rawData.find((d) => d.date === date);
+        return found || { date, sales: 0, revenue: 0, profit: 0 };
+      });
+
+      setSalesTrend(trends);
+
       setSalesTrend(trends);
 
       // 3️⃣ Stock pie chart
@@ -217,14 +249,19 @@ const DashboardPage: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={salesTrend}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatDate}
+                tick={{ fontSize: 12 }}
+              />
+
               <YAxis />
               <Tooltip
                 formatter={(value) => `MK ${(value ?? 0).toLocaleString()}`}
               />
               <Legend />
               <Line
-                type="monotone"
+                type="natural"
                 dataKey="sales"
                 stroke="#4ade80"
                 strokeWidth={2}
@@ -256,7 +293,12 @@ const DashboardPage: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={salesTrend}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatDate}
+                tick={{ fontSize: 12 }}
+              />
+
               <YAxis />
               <Tooltip
                 formatter={(value) => `MK ${(value ?? 0).toLocaleString()}`}
@@ -288,13 +330,13 @@ const DashboardPage: React.FC = () => {
               <Legend />
               <Bar
                 dataKey="totalQty"
-                fill="#e5e7eb"
+                fill="#60a5fa" // modern blue
                 name="Total Qty"
                 radius={[8, 8, 0, 0]}
               />
               <Bar
                 dataKey="soldQty"
-                fill="#4ade80"
+                fill="#22c55e" // modern green
                 name="Sold Qty"
                 radius={[8, 8, 0, 0]}
               />
