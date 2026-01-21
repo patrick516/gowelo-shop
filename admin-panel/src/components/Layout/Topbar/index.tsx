@@ -7,8 +7,12 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const handleLogout = () => {
-    // 🔒 hook your real logout logic here later
-    console.log("Logout clicked");
+    // 1. Remove token
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // 3. Redirect to login
+    window.location.href = "/login";
   };
 
   return (
