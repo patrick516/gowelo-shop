@@ -1,3 +1,4 @@
+// backend/src/models/StockBatch.js
 const mongoose = require("mongoose");
 
 const stockBatchSchema = new mongoose.Schema(
@@ -23,6 +24,11 @@ const stockBatchSchema = new mongoose.Schema(
     replenishedAt: {
       type: Date,
       default: Date.now,
+    },
+    status: {
+      type: String,
+      enum: ["PENDING", "ACTIVE", "SOLD_OUT"],
+      default: "ACTIVE", // default batch is active and available for selling
     },
   },
   { timestamps: true },

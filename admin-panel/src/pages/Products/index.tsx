@@ -49,6 +49,21 @@ const ProductsPage: React.FC<{ onUpdate?: () => void }> = ({ onUpdate }) => {
       setLoading(false);
     }
   };
+  const handleDeleteProduct = async (id: string) => {
+    const confirm = window.confirm(
+      "Are you sure? This product will be permanently deleted.",
+    );
+    if (!confirm) return;
+
+    try {
+      await api.delete(`/products/${id}`);
+      toast.success("Product deleted successfully");
+      fetchProducts();
+      onUpdate?.();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to delete product");
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -273,6 +288,7 @@ const ProductsPage: React.FC<{ onUpdate?: () => void }> = ({ onUpdate }) => {
                 <th className="p-2 text-right">Total Cost</th>
                 <th className="p-2 text-right">Expected Revenue</th>
                 <th className="p-2 text-right">Expected Profit</th>
+                <th className="p-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -300,6 +316,14 @@ const ProductsPage: React.FC<{ onUpdate?: () => void }> = ({ onUpdate }) => {
                     </td>
                     <td className="p-2 text-right">
                       {formatMK(profitPerProduct)}
+                    </td>
+                    <td className="p-2 text-center">
+                      <button
+                        onClick={() => handleDeleteProduct(p._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 );

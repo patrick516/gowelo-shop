@@ -56,3 +56,34 @@ exports.getProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Delete product safely
+exports.deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check remaining stock in batches
+    const activeBatches = await StockBatch.find({
+      productId: id,
+      quantityRemaining: { $gt: 0 },
+    });
+
+    if (activeBatches.length > 0) {
+      return res.status(400).json({
+        message:
+          "Cannot delete product. Stock still available. Sell out stock first.",
+      });
+    }
+
+    await Product.findByIdAndDelete(id);
+    await StockBatch.deleteMany({ productId: id });
+
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
